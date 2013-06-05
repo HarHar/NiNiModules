@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import ystockquote
+import urllib2
+from urllib import quote
+import xml.etree.ElementTree as ET
 
 class BotModule(object):
 	def __init__(self, storage):
@@ -16,14 +18,20 @@ class BotModule(object):
 			receiver.msg('Give me a symbol to fetch data for')
 			return
 
-		_all = ystockquote.get_all(args)
-		change = _all['change']
+		data = urllib2.urlopen('http://www.google.com/ig/api?stock=' + quote(args)).read()
+		root = ET.fromstring(data)
+
+		if len(root[0]) <= 4:
+			receiver.msg('Symbol not found, try again.')
+			return
+
+		change = root[0][18].get('data')
 		try:
-			if float(_all['change']) >= 0:
-				change = chr(3) + '03' + _all['change'] + chr(15)
+			if float(change) >= 0:
+				change = chr(3) + '03' + root[0][18].get('data') + chr(15)
 			else:
-				change = chr(3) + '05' + _all['change'] + chr(15)
+				change = chr(3) + '05' + root[0][18].get('data') + chr(15)
 		except:
 			pass
 
-		receiver.msg(chr(2) + args.upper() + chr(15) + ': ' + _all['price'] + ' (' + change + ')')
+		receiver.msg(chr(2) + root[0][3].get('data') + chr(15) + ' ' + root[0][10].get('data') + ' ' + root[0][9].get('data') + ' (' + change + ' '+ root[0][21].get('data') +')')
