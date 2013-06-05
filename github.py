@@ -11,7 +11,7 @@ class BotModule(object):
 		self.admins = {}
 		self.bot = None
 	def register(self):
-		return {'functions': [{'github': self.cmd_github}], 'aliases': {'donuts': 'donuts'}}
+		return {'functions': [{'github': self.cmd_github}], 'aliases': {'gh': 'github'}}
 	def event(self, ev):
 		#to parse URLs
 		pass
