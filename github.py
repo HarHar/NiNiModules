@@ -95,6 +95,29 @@ class BotModule(object):
 				c = chr(3) + '14 [' + udic['company'] + ']' + chr(15)
 		receiver.msg(chr(15) + chr(2) + udic['name'] + chr(15) + c + ' |' + chr(3) + '7 ' + udic['blog'] + chr(15) + ' |' + chr(3) + '4 ' + udic['location'] + chr(15) + ' |' + chr(3) + '7 ' + udic['email'] + chr(15) + ' |' + chr(3) + '4 ' + str(udic['public_gists']) + ' public gists' + chr(15) + ' |' + chr(3) + '7 ' + str(udic['public_repos']) + ' public repos' + chr(15) + ' |' + chr(3) + '4 ' + str(udic['followers']) + ' followers' + chr(15) + ' |' + chr(3) + '7 ' + str(udic['following']) + ' following' + chr(15) + ' |' + chr(3) + '4 Avatar: ' + gravatar)
 
+		languages = {}
+		for repo in dic:
+			if languages.get(repo['language']) == None:
+				languages[repo['language']] = 1
+			else:
+				languages[repo['language']] += 1
+
+		if len(languages) != 0:
+			highest = ('None', 0)
+
+			for l in languages:
+				if languages[l] > highest[1]:
+					highest = (l, languages[l])
+			fave = str(highest[0])
+			if fave == 'None': return
+
+			if fave == 'Python':
+				fave = chr(3) + '02' + fave.upper() + '!!' + chr(15)
+			elif fave.lower() in ['javascript', 'c#', 'java', 'html', 'css']:
+				fave = chr(3) + '03>' + fave + chr(15)
+
+			receiver.msg('Favorite language: ' + fave)
+
 	##############
 	#Web Page
 	##############
