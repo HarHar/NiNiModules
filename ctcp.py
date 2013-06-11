@@ -12,6 +12,7 @@ class BotModule(object):
 		return {'functions': [{'ctcp': self.cmd_ctcp}, {'priv': self.cmd_privset}]}
 	def event(self, ev):
 		if ev['name'] == 'msg':
+			if len(ev['msg']) == 0: return
 			if ev['msg'][0] == chr(1) and ev['from'].nick.lower() in self.pending:
 				split = ev['msg'].replace(chr(1), '').split(' ')
 				x = ''
