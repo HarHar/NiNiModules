@@ -10,6 +10,7 @@ def waitForCTCP(receiver, nick, pending, time):
 		sleep(1)
 		if (nick.lower() in pending) == False: return
 	receiver.msg(chr(3) + '07Warning' + chr(15) + ', timeout waiting for CTCP reply'.format(nick))
+	del pending[nick.lower()]
 
 class BotModule(object):
 	def __init__(self, storage):
