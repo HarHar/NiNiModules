@@ -1,5 +1,15 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import threading
+from time import sleep
+
+def waitForCTCP(receiver, nick, pending, time):
+	t = 0
+	while t < time:
+		t += 1
+		sleep(1)
+		if (nick.lower() in pending) == False: return
+	receiver.msg(chr(3) + '07Warning' + chr(15) + ', timeout waiting for CTCP reply'.format(nick))
 
 class BotModule(object):
 	def __init__(self, storage):
@@ -35,6 +45,10 @@ class BotModule(object):
 
 		self.bot.msg(s[0], chr(1) + s[1].upper() + ' ' + chr(1))
 		self.pending[s[0].lower()] = receiver.name
+		
+		thread = threading.Thread(target=waitForCTCP, args=(receiver, sender.nick, self.pending, 10))
+		thread.setDaemon(True)
+		thread.start()
 
 	def cmd_privset(self, args, receiver, sender):
 		"""priv [on/off] | {'public': False, 'admin_only': False} | Turns CTCP privacy on or off"""
