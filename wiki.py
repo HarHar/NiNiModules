@@ -75,13 +75,11 @@ def json(text):
       return eval(text.strip(' \t\r\n'), env, {})
    raise ValueError('Input must be serialised JSON.')
 
-
-
 class dummy():
-	def __init__(self):
-		self.res = ''
-	def say(self, res):
-		self.res = res
+    def __init__(self):
+        self.res = ''
+    def say(self, res):
+        self.res = res
 
 class BotModule(object):
     def __init__(self, storage):
@@ -98,8 +96,9 @@ class BotModule(object):
 
         wik(self.ph, args)
         if self.ph.res != '':
-          receiver.msg('{0}~ {1}'.format(sender.nick, self.ph.res))
-          self.ph.res = ''
+           self.ph.res = unicode(self.ph.res, 'utf-8')
+           receiver.msg(u"{0}~ {1}".format(sender.nick, self.ph.res))
+           self.ph.res = ''
         else:
           receiver.msg(chr(3) + '5Error!' + chr(15) + ' Something wrong happened :<')
 
