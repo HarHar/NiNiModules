@@ -6,9 +6,10 @@ Licensed under the Eiffel Forum License 2.
 
 http://inamidst.com/phenny/
 """
-
-import re, urllib, gzip, StringIO
-
+import re
+import urllib
+import gzip
+import StringIO
 import httplib2
 from htmlentitydefs import name2codepoint
 
@@ -23,57 +24,18 @@ urllib._urlopener = Grab()
 def get(uri): 
    if not uri.startswith('http'): 
       return
-   #u = urllib.urlopen(uri)
-   #bytes = u.read()
-   #u.close()
 
    conn = httplib2.Http()
    (response, bytes) = conn.request(uri)
  
    return bytes
 
-def head(uri): 
-   if not uri.startswith('http'): 
-      return
-   u = urllib.urlopen(uri)
-   info = u.info()
-   u.close()
-   return info
-
-def post(uri, query): 
-   if not uri.startswith('http'): 
-      return
-   data = urllib.urlencode(query)
-   u = urllib.urlopen(uri, data)
-   bytes = u.read()
-   u.close()
-   return bytes
-
 r_entity = re.compile(r'&([^;\s]+);')
-
-def entity(match): 
-   value = match.group(1).lower()
-   if value.startswith('#x'): 
-      return unichr(int(value[2:], 16))
-   elif value.startswith('#'): 
-      return unichr(int(value[1:]))
-   elif name2codepoint.has_key(value): 
-      return unichr(name2codepoint[value])
-   return '[' + value + ']'
 
 def decode(html): 
    return r_entity.sub(entity, html)
 
 r_string = re.compile(r'("(\\.|[^"\\])*")')
-r_json = re.compile(r'^[,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]+$')
-env = {'__builtins__': None, 'null': None, 'true': True, 'false': False}
-
-def json(text): 
-   """Evaluate JSON text safely (we hope)."""
-   if r_json.match(r_string.sub('', text)): 
-      text = r_string.sub(lambda m: 'u' + m.group(1), text)
-      return eval(text.strip(' \t\r\n'), env, {})
-   raise ValueError('Input must be serialised JSON.')
 
 class dummy():
     def __init__(self):
@@ -103,8 +65,6 @@ class BotModule(object):
           receiver.msg(chr(3) + '5Error!' + chr(15) + ' Something wrong happened :<')
 
 wikiuri = 'http://%s.wikipedia.org/wiki/%s'
-# wikisearch = 'http://%s.wikipedia.org/wiki/Special:Search?' \
-#                     + 'search=%s&fulltext=Search'
 
 r_tr = re.compile(r'(?ims)<tr[^>]*>.*?</tr>')
 r_paragraph = re.compile(r'(?ims)<p[^>]*>.*?</p>|<li(?!n)[^>]*>.*?</li>')
@@ -133,23 +93,6 @@ def text(html):
    html = r_tag.sub('', html)
    html = r_whitespace.sub(' ', html)
    return unescape(html).strip()
-
-def search(term): 
-   try: import search
-   except ImportError, e: 
-      print e
-      return term
-
-   if isinstance(term, unicode): 
-      term = term.encode('utf-8')
-   else: term = term.decode('utf-8')
-
-   term = term.replace('_', ' ')
-   try: uri = search.google_search('site:en.wikipedia.org %s' % term)
-   except IndexError: return term
-   if uri: 
-      return uri[len('http://en.wikipedia.org/wiki/'):]
-   else: return term
 
 def wikipedia(term, language='en', last=False): 
    global wikiuri
@@ -182,7 +125,6 @@ def wikipedia(term, language='en', last=False):
 
    if not paragraphs: 
       if not last: 
-         term = search(term)
          return wikipedia(term, language=language, last=True)
       return None
 
@@ -199,7 +141,6 @@ def wikipedia(term, language='en', last=False):
                           and not 'This article contains a' in para 
                           and not 'id="coordinates"' in para
                           and not 'class="thumb' in para]
-                          # and not 'style="display:none"' in para]
 
    for i, para in enumerate(paragraphs): 
       para = para.replace('<sup>', '|')
@@ -239,7 +180,6 @@ def wikipedia(term, language='en', last=False):
    sentence = sentence.decode('utf-8').encode('utf-8')
    wikiuri = wikiuri.decode('utf-8').encode('utf-8')
    term = term.decode('utf-8').encode('utf-8')
-   #return sentence + ' - ' + (wikiuri % (language, term))
    return sentence
 
 def wik(phenny, input): 
@@ -268,6 +208,3 @@ def wik(phenny, input):
    if result is not None: 
       phenny.say(result)
    else: phenny.say('Can\'t find anything in Wikipedia for "%s".' % origterm)
-
-wik.commands = ['wik']
-wik.priority = 'high'
