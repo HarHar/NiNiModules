@@ -130,7 +130,7 @@ class BotModule(object):
         p = path.split('/')
         #p[0] == '', p[1] == 'core', p[2] == 'SOMEPAGE', p[3] == '' <-- example
 
-        if len(p) >= 2:
+        if len(p) > 2:
             if p[2].lower() == 'torrentinfo':
                 if self.torrentInfo != None:
                     trackers = []
