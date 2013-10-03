@@ -11,10 +11,80 @@ class BotModule(object):
 		self.admins = {}
 		self.bot = None
 	def register(self):
-		return {'functions': [{'github': self.cmd_github}], 'aliases': {'gh': 'github'}}
+		return {'functions': [{'github': self.cmd_github, 'language': self.cmd_language}], 'aliases': {'gh': 'github', 'lang': 'language'}}
 	def event(self, ev):
 		#to parse URLs
 		pass
+
+	def cmd_language(self, args, receiver, sender):
+		"""github [user] | {'public': True, 'admin_only': False} | Gets GitHub info and statistics on user"""
+		if args.replace(' ', '') == '':
+			user = sender.nick
+		else:
+			user = quote(args)
+
+		queryurl = 'https://api.github.com/users/' + user + '/repos?sort=pushed'
+		conn = httplib2.Http(disable_ssl_certificate_validation=True)
+		try:
+			auth = base64.encodestring(githubCredentials[0] + ':' + githubCredentials[1])
+		except NameError:
+			auth = ''
+
+		if auth != '':
+			(response, content) = conn.request(queryurl, 'GET', headers = {'Authorization': 'Basic ' + auth})
+		else:
+			(response, content) = conn.request(queryurl)
+		io = StringIO(content)
+		dic = json.load(io)
+
+		queryurl = 'https://api.github.com/users/' + user
+		conn = httplib2.Http(disable_ssl_certificate_validation=True)
+		if auth != '':
+			(response, content) = conn.request(queryurl, 'GET', headers = {'Authorization': 'Basic ' + auth})
+		else:
+			(response, content) = conn.request(queryurl)
+		io = StringIO(content)
+		udic = json.load(io)
+
+		if dic.__contains__('message') == True:
+			receiver.msg('Error: ' + dic['message'])
+			return
+
+		if udic.__contains__('message') == True:
+			receiver.msg('Error: ' + udic['message'])
+			return
+
+		try:
+			if udic['name'] == None:
+				udic['name'] = udic['login']
+		except KeyError:
+			udic['name'] = udic['login']
+
+		fave = ''
+		languages = {}
+		for repo in dic:
+			if languages.get(repo['language']) == None:
+				languages[repo['language']] = 1
+			else:
+				languages[repo['language']] += 1
+		if len(languages) != 0:
+			highest = ('None', 0)
+
+			for l in languages:
+				if languages[l] > highest[1]:
+					highest = (l, languages[l])
+			fave = str(highest[0])
+			if fave == 'None': fave = ''
+
+			if fave == 'Python':
+				fave = chr(3) + '02' + fave.upper() + '!!' + chr(15)
+			elif fave.lower() in ['javascript', 'c#', 'java', 'html', 'css']:
+				fave = chr(3) + '03>' + fave + chr(15)
+
+		if fave != '':
+			receiver.msg(udic['name'] + '\'s favorite language: ' + chr(2) + fave)
+		else:
+			receiver.msg('Unknown language; 2obscure or non-existant')
 				
 	def cmd_github(self, args, receiver, sender):
 		"""github [user] | {'public': True, 'admin_only': False} | Gets GitHub info and statistics on user"""
