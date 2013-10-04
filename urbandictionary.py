@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import urllib
+import HTMLParser
 import httplib2
 from BeautifulSoup import BeautifulSoup
 
@@ -34,7 +35,8 @@ class BotModule(object):
         found = False
         for entry in urbandict(args, 1, 256):
             found = True
-            receiver.msg(chr(2) + args + chr(15) + ' ' + entry)
+            entry = HTMLParser.HTMLParser().unescape(entry)
+            receiver.msg(chr(2) + args + chr(15) + ': ' + entry)
 
         if not found:
             receiver.msg(chr(15) + 'Entry ' + chr (2) + args + chr(15) + ' not found')
