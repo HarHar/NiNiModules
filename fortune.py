@@ -17,7 +17,7 @@ class BotModule(object):
 		html = urllib2.urlopen("http://www.coe.neu.edu/cgi-bin/fortune")
 		soup = BeautifulSoup(html.read())
 		fortune = soup.pre.get_text()
-		fortune = fortune.replace("\n", "")
+		fortune = fortune.replace("\n", " ")
 		self.bot.msg(receiver.name, sender.nick + "~ " + fortune)
 
 	def http(self, path, handler):
