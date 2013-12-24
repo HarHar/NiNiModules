@@ -36,6 +36,7 @@ class BotModule(object):
         for entry in urbandict(args, 1, 256):
             found = True
             entry = HTMLParser.HTMLParser().unescape(entry)
+            entry = entry.decode('utf-8')
             receiver.msg(chr(2) + args + chr(15) + ': ' + entry)
 
         if not found:
