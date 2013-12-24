@@ -81,6 +81,7 @@ class BotModule(object):
 									self.playing[ev['to'].name]['lastwords'] = self.playing[ev['to'].name]['lastwords'][1:]
 							else:
 								#self.bot.msg(ev['to'].name, 'That\'s a valid word, but it did not match end of previous word')
+								pass
 						else:
 							#self.bot.msg(ev['to'].name, 'That\'s not a word!')
 							pass
