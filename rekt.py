@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+# @author: ndri (https://github.com/ndri/bum-irc-bot/blob/master/modules/uwotm8.py)
 import random
 
 class BotModule(object):
