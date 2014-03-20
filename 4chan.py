@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import json
+from Queue import Queue
 from urllib2 import urlopen
 from BeautifulSoup import BeautifulStoneSoup
 
@@ -19,9 +20,11 @@ class BotModule(object):
 				
 	def search4chan(self, args, receiver, sender):
 		""" 4chan | {'public': True, 'admin_only': False} | Searches a specified 4chan board and returns any threads that match."""
-		if args == "$next":
-			self.printThread(self.results[self.resultNum], receiver.name)
-			self.resultNum += 1
+		if args == "$next" and self.results.empty() == False:
+			self.printThread(self.results.get(), receiver.name)
+			return
+		if args == "$next" and self.results.empty():
+			self.bot.msg(receiver.name, "No more results.")	
 			return
 		if len(args.split(' ')) <= 1:
 			receiver.msg(chr(3) + '4Error!' + chr(15) + ' You need to specify board and query terms')
@@ -36,23 +39,25 @@ class BotModule(object):
 			self.bot.msg(receiver.name, "It seems you didn't specify a real board")
 			return
 		catalog = json.load(req)
-		self.results = []
+		self.results = Queue()
 		x = 0
 		while x < 10:
 			for thread in catalog[x]['threads']:
 				try:
 					if query in thread['sub'].lower():
-						self.results.append(thread)
+						self.results.put(thread)
 				except:
 					pass
 				try:
 					if query in thread['com'].lower():
-						self.results.append(thread)
+						self.results.put(thread)
 				except:
 					pass
 			x += 1
-		self.resultNum = 1
-		self.printThread(self.results[0], receiver.name)
+		if self.results.empty():
+			self.bot.msg(receiver.name, "No results found.")
+		else:
+			self.printThread(self.results.get(), receiver.name)
 
 	def printThread(self, thread, receiver):
 		""" Pretty prints a thread"""
