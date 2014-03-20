@@ -17,7 +17,7 @@ def urbandict(search, limit=5, cutafter=256):
     extract = lambda item: isinstance(item, unicode) and item or \
         (item.name == 'a' and item.contents[0] or '')
 
-    for item, count in zip(soup.findAll('div', attrs={'class':'definition'}), range(limit)):
+    for item, count in zip(soup.findAll('div', attrs={'class':'meaning'}), range(limit)):
         yield cut(' '.join([fix(extract(k)) for k in item.contents])).encode('utf-8')
 
 class BotModule(object):
