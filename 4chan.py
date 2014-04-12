@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import json
 from Queue import Queue
+from Queue import Empty
 from urllib2 import urlopen
 from BeautifulSoup import BeautifulStoneSoup
 
@@ -15,17 +16,20 @@ class BotModule(object):
 		self.storage = storage
 		self.admins = {}
 		self.bot = None
+		self.results = Queue()
+
 	def register(self):
 		return {'functions': [{'4chan': self.search4chan}]}
 				
 	def search4chan(self, args, receiver, sender):
 		""" 4chan | {'public': True, 'admin_only': False} | Searches a specified 4chan board and returns any threads that match."""
-		if args == "$next" and self.results.empty() == False:
-			self.printThread(self.results.get(), receiver.name)
+		if args == "$next":
+			if self.results.empty():
+				self.bot.msg(receiver.name, "No more threads to display.")
+				return
+			self.printThread(self.results.get_nowait(), receiver.name)
 			return
-		if args == "$next" and self.results.empty():
-			self.bot.msg(receiver.name, "No more results.")	
-			return
+		
 		if len(args.split(' ')) <= 1:
 			receiver.msg(chr(3) + '4Error!' + chr(15) + ' You need to specify board and query terms')
 			return
@@ -44,12 +48,7 @@ class BotModule(object):
 		while x < 10:
 			for thread in catalog[x]['threads']:
 				try:
-					if query in thread['sub'].lower():
-						self.results.put(thread)
-				except:
-					pass
-				try:
-					if query in thread['com'].lower():
+					if query in thread['sub'].lower() or query in thread['com'].lower():
 						self.results.put(thread)
 				except:
 					pass
