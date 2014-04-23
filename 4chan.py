@@ -4,12 +4,13 @@ import json
 from Queue import Queue
 from Queue import Empty
 from urllib2 import urlopen
-from BeautifulSoup import BeautifulStoneSoup
+from HTMLParser import HTMLParser
+from BeautifulSoup import BeautifulSoup
 
 def HTMLEntitiesToUnicode(text):
-    """Converts HTML entities to unicode.  For example '&amp;' becomes '&'."""
-    text = unicode(BeautifulStoneSoup(text, convertEntities=BeautifulStoneSoup.ALL_ENTITIES))
-    return text
+	"""Converts HTML entities to unicode.  For example '&amp;' becomes '&'."""
+	soup = BeautifulSoup(text)
+	return HTMLParser().unescape(soup.text)
 
 class BotModule(object):
 	def __init__(self, storage):
@@ -48,10 +49,15 @@ class BotModule(object):
 		while x < 10:
 			for thread in catalog[x]['threads']:
 				try:
-					if query in thread['sub'].lower() or query in thread['com'].lower():
+					if query in thread['sub'].lower():
 						self.results.put(thread)
 				except:
-					pass
+					try:
+						if query in thread['com'].lower():
+							self.results.put(thread)
+					except:
+						pass
+
 			x += 1
 		if self.results.empty():
 			self.bot.msg(receiver.name, "No results found.")
@@ -79,7 +85,7 @@ class BotModule(object):
 		# these guys count from zero so we gotta increment them
 		replyNum = str(thread['replies']+1)
 		imageNum = str(thread['images']+1)
-		link = "https://boards.4chan.org/" + self.currentBoard + "/res/" + str(thread['no'])
+		link = "https://boards.4chan.org/" + self.currentBoard + "/thread/" + str(thread['no'])
 		try:
 			link = self.bot.modules['google']['instance'].shortenUrl(link)
 		except:
