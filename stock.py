@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import urllib2
 from urllib import quote
-import xml.etree.ElementTree as ET
 
 class BotModule(object):
 	def __init__(self, storage):
