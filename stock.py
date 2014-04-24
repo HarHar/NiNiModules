@@ -18,20 +18,13 @@ class BotModule(object):
 			receiver.msg('Give me a symbol to fetch data for')
 			return
 
-		data = urllib2.urlopen('http://www.google.com/ig/api?stock=' + quote(args)).read()
-		root = ET.fromstring(data)
-
-		if len(root[0]) <= 4:
+		data = urllib2.urlopen('http://finance.yahoo.com/d/quotes.csv?s=' + quote(args) + "&f=snd1|l1k2").read()
+		data = data.split(",")
+		if data[2][1:-1] == 'N/A':
 			receiver.msg('Symbol not found, try again.')
 			return
+		
+		price = data[4]
+		change = data[-1].split()[2][:-1]
 
-		change = root[0][18].get('data')
-		try:
-			if float(change) >= 0:
-				change = chr(3) + '03' + root[0][18].get('data') + chr(15)
-			else:
-				change = chr(3) + '05' + root[0][18].get('data') + chr(15)
-		except:
-			pass
-
-		receiver.msg(chr(2) + root[0][3].get('data') + chr(15) + ' ' + root[0][10].get('data') + ' ' + root[0][9].get('data') + ' (' + change + ' '+ root[0][21].get('data') +')')
+		receiver.msg(chr(2) + args + chr(15) + ': $' + price + " - Today's change " + change)
